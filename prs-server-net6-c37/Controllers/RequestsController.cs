@@ -14,11 +14,11 @@ namespace prs_server_net6_c37.Controllers {
     [ApiController]
     public class RequestsController : ControllerBase {
         private readonly PrsContext _context;
-        private const string NEW = "New";
-        private const string EDIT = "Edit";
-        private const string REVIEW = "Review";
-        private const string APPROVED = "Approved";
-        private const string REJECTED = "Rejected";
+        private const string NEW = "NEW";
+        private const string EDIT = "EDIT";
+        private const string REVIEW = "REVIEW";
+        private const string APPROVED = "APPROVED";
+        private const string REJECTED = "REJECTED";
 
         public RequestsController(PrsContext context) {
             _context = context;

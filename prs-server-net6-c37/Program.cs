@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<PrsContext>(x => {
-    x.UseSqlServer(builder.Configuration.GetConnectionString("DevDb"));
+    x.UseSqlServer(builder.Configuration.GetConnectionString("ServerDb"));
 });
 builder.Services.AddCors();
 
