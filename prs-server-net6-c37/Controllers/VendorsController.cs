@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using prs_server_net6_c37.Models;
+using prs_server_net6_c37.ViewModels;
 
 namespace prs_server_net6_c37.Controllers {
     [Route("api/[controller]")]
@@ -17,6 +18,42 @@ namespace prs_server_net6_c37.Controllers {
 
         public VendorsController(PrsContext context) {
             _context = context;
+        }
+
+        // GET: api/Vendors/Po/5
+        [HttpGet("po/{id}")]
+        public async Task<ActionResult<Po>> GetPoForVendor(int id) {
+            if (_context.Vendors == null) {
+                return NotFound();
+            }
+            Po po = new();
+            // get the vendor
+            po.Vendor = await _context.Vendors.FindAsync(id);
+            // get all the requirestlines
+            var rawPolines = from v in _context.Vendors
+                             join p in _context.Products
+                                 on v.Id equals p.VendorId
+                             join l in _context.Requestlines
+                                 on p.Id equals l.ProductId
+                             join r in _context.Requests
+                                 on l.RequestId equals r.Id
+                             where v.Id == id && r.Status == "APPROVED"
+                             select new {
+                                 Poline = new Poline {
+                                     Product = p.Name, PartNbr = p.PartNbr, Price = p.Price, Quantity = l.Quantity
+                                 }
+                             };
+            po.Polines = from p in rawPolines
+                         group p by p.Poline.Product into pogrp
+                         orderby pogrp.Key
+                         select new Poline {
+                             Product = pogrp.Key,
+                             PartNbr = pogrp.First().Poline.PartNbr,
+                             Price = pogrp.First().Poline.Price,
+                             Quantity = pogrp.Sum(x => x.Poline.Quantity)
+                         };
+            po.PoTotal = po.Polines.Sum(x => x.LineTotal);
+            return po;
         }
 
         // GET: api/Vendors
